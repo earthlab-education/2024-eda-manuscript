@@ -1,0 +1,486 @@
+---
+title: 
+output: 
+  html_document:
+    #toc: true
+---
+
+```{r, results=FALSE, message=FALSE, echo=FALSE}
+
+# Load libraries
+library(qualtRics)
+library(plyr)
+library(tidyverse)
+library(gridExtra)
+library(cowplot)
+library(knitr)
+library(kableExtra)
+library(magick)
+library(ggpubr)
+```
+
+```{r, fig.width = 5, fig.asp = .99, results='markup', echo=FALSE, warning = FALSE, message = FALSE, tidy=TRUE}
+
+# Create logo for document header and footer
+earthlab_orig <- image_read(path = "earth-lab-logo-white.png") %>%
+   image_scale("x80")
+
+twitter_orig <- image_read(path = "plot-footer-twitter.png") %>%
+   image_scale("x70")
+
+black_banner <- image_read(path = "black-banner.png")
+
+earthlab_logo <- image_composite(image_scale(black_banner, "1000x100"), earthlab_orig, offset = "+30+10")
+twitter_logo <- image_composite(image_scale(black_banner, "1000x100"), twitter_orig, offset = "+540+15")
+
+logo <- image_append(image_scale(c(earthlab_logo, twitter_logo)), stack = FALSE)
+
+logo
+```
+
+# Examinging Students' Changing Approaches to Earth Data Science Problem Solving 
+The following data represent student responses to a set of questions related to their approach to solving a data science problem that deals with plotting average temperature data. 
+
+This report is interested in how students' responses to this same set of items change over time as a result of gaining hands on Earth Data Science (EDS) experience through the Earth Data Analytics - Foundations Professional Certificate. 
+
+Students enrolled in the certificate program (2019-2021) were asked to respond to the following questions related to their EDS problem solving approach before and after the 1st course of the three-course sequence (**_Earth Analytics Data Science Bootcamp_**), at the end of the 2nd course (**_Earth Analytics -  Python_**), and again following the 3rd course (**_Earth Analytics Applications_**).
+
+***
+
+#### **_Describe your approach to data analysis_**
+_You have 32 text files that contain average daily temperature data for Boulder, Colorado over the last 32 years, stored in degrees Fahrenheit. Each text file contains 1 years worth of data. You need to calculate the monthly average temperature in degrees Celsius for each year and then plot temperature over time. Your final plot will look similar to:_
+
+```{r, fig.width = 5, fig.asp = .99, results='markup', echo=FALSE, warning = FALSE, message = FALSE, tidy=TRUE}
+
+# Create logo for document header and footer
+boulder_temp <- image_read(path = "boulder_temp.png") %>%
+   image_scale("x500")
+
+boulder_temp_img <- image_append((image_scale(boulder_temp)), stack = FALSE)
+
+boulder_temp_img
+```
+
+##### **_Answer the following questions about this task:_**
+_1.) Select the tool that you would use to efficiently process these text files given your current skills and knowledge. (Select all that apply)_
+
+_2.) Consider the tool(s) that you selected above - how comfortable are you implementing this task in that tool?_
+
+_3.) Describe the steps (a step by step approach) that you would take to perform this analysis given the tools that you know how to use._
+
+***
+
+## Earth Analytics Data Science Bootcamp
+
+### Pre-Course Survey Responses
+
+Here we begin by looking at responses from the survey taken _before_ the **_Earth Analytics Data Science Bootcamp_** course (_pre-bootcamp_), the first time certificate students are asked about their EDS problem solving approaches. Since this question was first asked in the fall of 2019, a total of **70** students have answered the above set of questions on the _pre-bootcamp_ survey. 
+
+##### **_1.) Select the tool that you would use to efficiently process these text files given your current skills and knowledge. (Select all that apply):_**
+
+Students were allowed to provide more than one answer when asked about the tools they would use to solve the task described above. In total, **48** students said they would use _Excel_, **34** answered _Scientific Programming (e.g. R & Python)_, **2** said they'd use Bash/Shell, and **5** reported _Other_ with responses including tools like Matlab, IDL, and Igor. 
+
+```{r, echo=FALSE, message=FALSE, fig.width = 10, fig.asp = .5}
+# Reading in the data
+bootcamp_pre <- read.csv("data-approach-bootcamp-pre.csv")
+
+# Duplicating data 
+bootcamp_pre1 <- bootcamp_pre
+
+# Replace empty strings with NA
+bootcamp_pre1[bootcamp_pre1 == ""] <- NA
+
+# Combining Tool response options and converting Factors to Characters
+tool <- cbind(as.character(bootcamp_pre1$Tool_1),
+              as.character(bootcamp_pre1$Tool_2),
+              as.character(bootcamp_pre1$Tool_3),
+              as.character(bootcamp_pre1$Tool_4))
+
+# Removing NA values
+tool_na <- tool[!is.na(tool)]
+
+# Converting to data frame
+tool_na2 <- data.frame(tool_na)
+
+tool_na2_csv <- write.csv(tool_na2, "tool_na2.csv")
+
+
+# Making a quick table
+tool_table <- table(tool_na2$tool_na)
+
+# After hacking into Excel to add a 'year' column
+tool_year_pre <- read.csv("tool_year_pre.csv")
+tool_year_pre_count <-read.csv("tool_year_pre_count.csv")
+
+# Reordering the levels
+tool_year_pre_count$Tool <- factor(tool_year_pre_count$Tool, levels=c("Excel",
+                      "Scientific Programming (e.g. R, Python)",
+                      "Bash/Shell",
+                      "Other (please list)"))
+
+
+# Reordering the levels
+tool_year_pre_count$Year <- factor(tool_year_pre_count$Year, levels=c("2022",
+                      "2021",
+                      "2020"))
+
+
+
+# Make frequency distribution
+ggplot(tool_year_pre_count, aes(x=Tool, y=Count, fill=Year)) +
+  geom_bar(stat = "identity", position = "stack") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 20), drop=FALSE, limits = rev(levels(tool_year_pre_count$Tool))) +
+  theme_minimal_vgrid() +
+  ylab("Count") +
+  scale_fill_manual(
+    values = c("2020" = "#b2e2e2", "2021" = "#66c2a4", "2022" = "#2ca25f"), 
+    breaks = c("2022","2021","2020"),
+    labels = c("2022","2021","2020")) +
+  theme(axis.title.x = element_text(size = 11),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.title.y = element_blank(),
+        axis.ticks = element_blank()) + coord_flip()
+```
+
+##### **_Other (please list):_**
+```{r,echo=FALSE, results='asis'}
+tools_other <- na.omit(bootcamp_pre1$Other.text)
+kable(tools_other, col.names = "") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), font_size = 15)
+```
+
+
+##### **_2.) Consider the tool(s) that you selected above - how comfortable are you implementing this task in that tool?_**
+
+Overall, respondents reported a relatively high level of comfort with these different EDS problem solving tools. In total, **19** students reported being _very comfortable_ with the tools they listed in the previous question, with **39** saying they were _comfortable_. Fewer students reported lower levels of comfort with these tools, with **8** saying they were _uncomfortable_, and just **4** responding that they were _very uncomfortable_.
+
+```{r, fig.width = 10, fig.asp = .5, echo=FALSE, results=FALSE, message=FALSE}
+# Making a table of item responses and counts
+comfort_table <- table(bootcamp_pre1$Comfort, bootcamp_pre1$Class.of)
+#comfort_table
+
+bootcamp_pre1$Comfort <- factor(bootcamp_pre1$Comfort, 
+                      level = c("I am very uncomfortable using this tool",
+                                "I am uncomfortable using this tool",
+                                "I am comfortable using this tool",
+                                "I am very comfortable using this tool"))
+
+# Create a plot
+ggplot(data=subset(bootcamp_pre1, !is.na(Comfort)), aes(Comfort)) + 
+  geom_bar(color='black', fill='darkorchid4') + scale_y_continuous(breaks=c(0,10,20,30,40,50), expand = expansion(mult = c(0, 0.05))) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 40), drop=FALSE) +
+  ylab("Count") +
+  theme_minimal_vgrid() +
+  theme(plot.title = element_text(size=12, face="italic"),
+        axis.title.x = element_text(size=11),
+        axis.text.x = element_text(size=10),
+        axis.text.y = element_text(size=10),
+        axis.title.y = element_blank(),
+        axis.ticks = element_blank()) + coord_flip()
+```
+
+
+##### **3.) _Describe the steps (a step by step approach) that you would take to perform this analysis given the tools that you know how to use._**
+
+Tabulated below are the written responses that students provided when asked to describe the step-by-step workflow that they would use to go about solving this problem using the tool(s) they selected above. While there are a number of responses that describe in some detail how to solve the problem outlined here using scientific programming (eg. R & Python), many of written descriptions that involved the use of Excel were quite brief and lacked detail. Notably, respondents indicated that they might first clean or organize the data using Excel before moving to R or Python to summarize and display the data, suggesting that Excel still plays a large role even for many of those students who had some experience with other scientific programming languages.
+```{r,echo=FALSE, results='asis'}
+steps <- na.omit(bootcamp_pre1$Approach)
+kable(steps, col.names = "") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), font_size = 15)
+```
+
+***
+
+### Post-Course Survey Responses
+
+##### **_1.) Select the tool that you would use to efficiently process these text files given your current skills and knowledge. (Select all that apply):_**
+Fast forwarding to the responses (n = **60**) from this same set of prompts when they were asked again on the survey given _after_ the **_Earth Analytics Data Science Bootcamp_** course (post-bootcamp) we notice a significant shift in the distribution tools used to solve the problem described above. Here we see far fewer instances of students using Excel, with larger proportion of students reporting that they would use Scientific Programming (e.g. R & Python). Here, all **60** students who have completed this survey (2019-2021) responded that they would use Scientific Programming (e.g. R, Python), while **14** said that they would also use Excel (down from **48** who said they'd use Excel on the _pre-bootcamp_ survey). Additionally, **20** students said that they would also use Bash/Shell to solve the problem described above, up from **2** such responses on the _pre-bootcamp_ survey. Some identified Matlab, Jupyter Notebook, and a combination of Python and Excel as other possible problem solving tools. Students were allowed to select more than one tool to solve this problem.
+```{r, echo=FALSE, message=FALSE, fig.width = 10, fig.asp = .5}
+# Reading in the data
+bootcamp_post <- read.csv("data-approach-bootcamp-post.csv")
+
+# Duplicating data 
+bootcamp_post1 <- bootcamp_post
+
+# Replace empty strings with NA
+bootcamp_post1[bootcamp_post1 == ""] <- NA
+
+# Combining Tool response options and converting Factors to Characters
+tool_post <- cbind(as.character(bootcamp_post1$Tool_1),
+              as.character(bootcamp_post1$Tool_2),
+              as.character(bootcamp_post1$Tool_3),
+              as.character(bootcamp_post1$Tool_4))
+
+# Removing NA values
+tool_post_na <- tool_post[!is.na(tool_post)]
+
+# Converting to data frame
+tool_post_na2 <- data.frame(tool_post_na)
+
+
+# Breaking into Excel to get counts by tool & year
+tool_year_post_count <- read.csv("tool_year_post_count.csv")
+
+# Reordering the levels
+tool_year_post_count$Tool <- factor(tool_year_post_count$Tool, levels=c("Excel",
+                      "Scientific Programming (e.g. R, Python)",
+                      "Bash/Shell",
+                      "Other (please list)"))
+
+
+tool_year_post_count$Year <- factor(tool_year_post_count$Year, levels=c("2022",
+                      "2021",
+                      "2020"))
+
+
+# Making a quick table
+tool_post_table <- table(tool_post_na2$tool_post_na)
+
+ggplot(tool_year_post_count, aes(x=Tool, y=Count, fill=Year)) +
+  geom_bar(stat = "identity", position = "stack") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 20), drop=FALSE, limits = rev(levels(tool_year_post_count$Tool))) +
+  theme_minimal_vgrid() +
+  ylab("Count") +
+  scale_fill_manual(
+    values = c("2020" = "#b2e2e2", "2021" = "#66c2a4", "2022" = "#2ca25f"), 
+    breaks = c("2022","2021","2020"),
+    labels = c("2022","2021","2020")) +
+  theme(axis.title.x = element_text(size = 11),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.title.y = element_blank(),
+        axis.ticks = element_blank()) + coord_flip()
+```
+
+##### **_Other (please list):_**
+```{r,echo=FALSE, results='asis'}
+process_tools_other_post <- na.omit(bootcamp_post1$Other.text)
+kable(process_tools_other_post, col.names = "") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), font_size = 15)
+```
+
+
+##### **_2.) Consider the tool(s) that you selected above - how comfortable are you implementing this task in that tool?_**
+
+Following completion of the Bootcamp course, respondents still reported high levels of comfort with their selected data science tools. Here, **9** students said they were _very comfortable_ with the tools they listed in the previous question, with **32** answering that they were _comfortable_. Now just **2** students said they were _uncomfortable_, and **0** responded that they were _very uncomfortable_.
+
+```{r, fig.width = 10, fig.asp = .5, echo=FALSE, results=FALSE, message=FALSE}
+# Making a table of item responses and counts
+comfort_table_post <- table(bootcamp_post1$Comfort, bootcamp_post1$Cohort)
+
+# Reordinging the response levels
+bootcamp_post1$Comfort <- factor(bootcamp_post1$Comfort, 
+                      level = c("I am very uncomfortable using this tool",
+                                "I am uncomfortable using this tool",
+                                "I am comfortable using this tool",
+                                "I am very comfortable using this tool"))
+
+# Create a plot
+ggplot(data=subset(bootcamp_post1, !is.na(Comfort)), aes(Comfort)) + 
+  geom_bar(color='black', fill='darkorchid4') + scale_y_continuous(breaks=c(0,10,20,30,40,50), expand = expansion(mult = c(0, 0.05))) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 40), drop=FALSE) +
+  ylab("Count") +
+  theme_minimal_vgrid() +
+  theme(plot.title = element_text(size=12, face="italic"),
+        axis.title.x = element_text(size=11),
+        axis.text.x = element_text(size=10),
+        axis.text.y = element_text(size=10),
+        axis.title.y = element_blank(),
+        axis.ticks = element_blank()) + coord_flip()
+```
+
+
+##### **3.) _Describe the steps (a step by step approach) that you would take to perform this analysis given the tools that you know how to use._**
+
+Again students were asked to provide a step-by-step workflow outlining how they would use the data science tools of their choice to solve the problem described above. After completing the Bootcamp course students' workflows are generally more detailed, and now frequently rely on loops, conditional statements, and other modular approaches to coding that prevent the use of repetetive steps, including the use of functions. 
+```{r,echo=FALSE, results='asis'}
+steps_post <- na.omit(bootcamp_post1$Approach)
+kable(steps_post, col.names = "") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), font_size = 15)
+```
+
+***
+
+### Discussion
+Text goes here Text goes here Text goes here Text goes here Text goes here Text goes here Text goes here Text goes here Text goes here Text goes here Text goes here Text goes here Text goes here Text goes here Text goes here Text goes here Text goes here 
+```{r, fig.width = 4.5, fig.height=4, echo=FALSE, results=FALSE, message=FALSE}
+# Make frequency distribution
+# Make frequency distribution
+ggplot(tool_year_pre_count, aes(x=Tool, y=Count, fill=Year)) +
+  geom_bar(stat = "identity", position = "stack") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 20), drop=FALSE, limits = rev(levels(tool_year_pre_count$Tool))) +
+  theme_minimal_vgrid() +
+  ylab("Count") +
+  ggtitle("Pre-Bootcamp") +
+  scale_fill_manual(
+    values = c("2020" = "#b2e2e2", "2021" = "#66c2a4", "2022" = "#2ca25f"), 
+    breaks = c("2020","2021","2022"),
+    labels = c("2020","2021","2022")) +
+  theme(axis.title.x = element_text(size = 11),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.title.y = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "top",
+        legend.title = element_blank(),
+        legend.text = element_text(size=9)) + coord_flip()
+```
+```{r, fig.width = 4.5, fig.height = 4, echo=FALSE, results=FALSE, message=FALSE}
+# Make frequency distribution
+ggplot(tool_year_post_count, aes(x=Tool, y=Count, fill=Year)) +
+  geom_bar(stat = "identity", position = "stack") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 20), drop=FALSE, limits = rev(levels(tool_year_post_count$Tool))) +
+  theme_minimal_vgrid() +
+  ylab("Count") +
+  ggtitle("Post-Bootcamp") +
+  scale_fill_manual(
+    values = c("2020" = "#b2e2e2", "2021" = "#66c2a4", "2022" = "#2ca25f"), 
+    breaks = c("2020","2021","2022"),
+    labels = c("2020","2021","2022")) +
+  theme(axis.title.x = element_text(size = 11),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.title.y = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "top",
+        legend.title = element_blank(),
+        legend.text = element_text(size=9)) + coord_flip()
+```
+
+```{r, fig.width = 4.5, fig.height = 3, echo=FALSE, results=FALSE, message=FALSE}
+# Make frequency distribution
+ggplot(data=subset(bootcamp_pre1, !is.na(Comfort)), aes(Comfort)) + 
+  geom_bar(color='black', fill='darkorchid4') + scale_y_continuous(breaks=c(0,10,20,30,40,50), expand = expansion(mult = c(0, 0.05))) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 30), drop=FALSE) +
+  ylab("Count") +
+  ggtitle("Pre-Bootcamp") +
+  theme_minimal_vgrid() +
+  theme(axis.title.x = element_text(size=11),
+        axis.text.x = element_text(size=9),
+        axis.text.y = element_text(size=9),
+        axis.title.y = element_blank(),
+        axis.ticks = element_blank()) + coord_flip()
+```
+```{r, fig.width = 4.5, fig.height = 3, echo=FALSE, results=FALSE, message=FALSE}
+# Make frequency distribution
+ggplot(data=subset(bootcamp_post1, !is.na(Comfort)), aes(Comfort)) + 
+  geom_bar(color='black', fill='darkorchid4') + scale_y_continuous(breaks=c(0,10,20,30,40,50), expand = expansion(mult = c(0, 0.05))) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 30), drop=FALSE) +
+  ylab("Count") +
+  ggtitle("Post-Bootcamp") +
+  theme_minimal_vgrid() +
+  theme(axis.title.x = element_text(size=11),
+        axis.text.x = element_text(size=9),
+        axis.text.y = element_text(size=9),
+        axis.title.y = element_blank(),
+        axis.ticks = element_blank()) + coord_flip()
+```
+
+
+
+```{r subplots w/ single legend, fig.width=8, fig.height=3, echo=FALSE, results=FALSE, message=FALSE}
+# Using the tutorial from the following page: 
+# http://www.sthda.com/english/wiki/wiki.php?id_contents=7930
+
+
+# Make 'tools pre' plot (w/o a legend!)
+tools_pre <- ggplot(tool_year_pre_count, aes(x=Tool, y=Count, fill=Year)) +
+  geom_bar(stat = "identity", position = "stack") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 20), drop=FALSE, limits = rev(levels(tool_year_pre_count$Tool))) +
+  theme_minimal_vgrid() +
+  ylab("Count") +
+  ggtitle("Pre-Bootcamp") +
+  scale_fill_manual(
+    values = c("2020" = "#b2e2e2", "2021" = "#66c2a4", "2022" = "#2ca25f"), 
+    breaks = c("2020","2021","2022"),
+    labels = c("2020","2021","2022")) +
+  theme(axis.title.x = element_text(size = 11),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.title.y = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "none",
+        legend.title = element_blank(),
+        legend.text = element_text(size=9)) + coord_flip() 
+
+
+# Make a 'tools post' plot (w/o a legend!)
+tools_post <- ggplot(tool_year_post_count, aes(x=Tool, y=Count, fill=Year)) +
+  geom_bar(stat = "identity", position = "stack") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 20), drop=FALSE, limits = rev(levels(tool_year_post_count$Tool))) +
+  theme_minimal_vgrid() +
+  ylab("Count") +
+  ggtitle("Post-Bootcamp") +
+  scale_fill_manual(
+    values = c("2020" = "#b2e2e2", "2021" = "#66c2a4", "2022" = "#2ca25f"), 
+    breaks = c("2020","2021","2022"),
+    labels = c("2020","2021","2022")) +
+  theme(axis.title.x = element_text(size = 11),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.title.y = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "none",
+        legend.title = element_blank(),
+        legend.text = element_text(size=9)) + coord_flip() 
+
+
+# Combine the two plots using plot_grid (from the cowplot package)
+#comboplot1 <- cowplot::plot_grid(tools_pre, tools_post, ncol = 2, nrow = 1)
+#comboplot1
+
+# Combining plots using grid.arrange (from the gridExtra package)
+#comboplot2 <- gridExtra::grid.arrange(tools_pre, tools_post, ncol=2, nrow =1)
+#comboplot2
+
+
+# To save the legend of a plot the helper function may be useful
+get_legend<-function(myggplot){
+  tmp <- ggplot_gtable(ggplot_build(myggplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)
+}
+
+
+
+# Save legend from one of the plots (pre-bootcamp); since same for both plots either pre/post could be used here
+legend <- get_legend(tools_pre + theme(legend.position="bottom"))
+
+grid.arrange(arrangeGrob(tools_pre, tools_post, ncol = 2),
+             legend, nrow = 2, heights = c(10, 1))
+
+
+# Remove legend from tools_pre plot
+#tools_pre <- tools_pre + theme(legend.position = "none")
+
+# Combine the tools_pre, tools_post, and legend into single plot using grid.arrange and specify width of each column
+#grid.arrange(tools_pre, tools_post, legend, ncol=3, widths=c(3, 3, 1))
+
+
+# Legend bottom center
+#grid.arrange(tools_pre, tools_post, legend, ncol=2, nrow = 2, 
+             #layout_matrix = rbind(c(1,2), c(3,3)),
+             #widths = c(2.7, 2.7), heights = c(2.5, 0.2))
+
+# Legend top center(?)
+#grid.arrange(legend, tools_pre, tools_post,  nrow = 2, ncol=2, 
+             #layout_matrix = rbind(c(1,1), c(2,3)),
+             #widths = c(2.7, 2.7), heights = c(0.2, 2.5))
+
+
+# Let's try using ggarrange from ggpubr package (see: https://stackoverflow.com/questions/13649473/add-a-common-legend-for-combined-ggplots)
+
+ggarrange(tools_pre, tools_post, common.legend = TRUE, legend = "bottom")
+
+
+
+```
+
