@@ -1,0 +1,507 @@
+---
+title: "eda-manuscript-demographics"
+output: html_document
+date: "2024-10-07"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r set up theme}
+library(tidyverse)
+
+# Plot theme
+ea_theme <- function (base_family = "Arial") { 
+    theme_bw() %+replace%
+    theme(legend.key.size = unit(2, 'lines'), 
+          plot.title = element_text(size=18, face = "bold", hjust = 0, 
+                                    vjust = 2.5, margin = margin(t = 20, r = 0, 
+                                                                 b = 20, l = 0)), 
+          plot.subtitle = element_text(size=14, hjust = 0, vjust = 1.5),
+          strip.text = element_text(size = 12), 
+          axis.title=element_text(size=11),
+          axis.text = element_text(size=10, color = "black", 
+                                     margin = margin(t = 10, r = 0, b = 10, l = 0)), 
+          text = element_text(family = base_family, face = "plain",
+                              color = "black", size = 22,
+                              hjust = 0.5, vjust = 0.5, angle = 0, 
+                              lineheight = 1,
+                              margin = margin(t = 0, r = 10, b = 0, l = 10), 
+                              debug = FALSE), legend.text=element_text(size=16), 
+          legend.title=element_text(size=20), 
+          plot.caption = element_text(margin = margin(t = 0, r = 10, b = 0, l = 10), 
+                                      size = 14, color = "gray38", hjust = 1))
+}
+
+# Get data
+gender_data <- read_csv("gender.csv")
+age_data <- read_csv("age.csv")
+degree_level_data <- read_csv("degree_level.csv")
+degree_background_data <- read_csv("degree_background.csv")
+
+
+
+
+# Gender
+gender_plot <- gender_data %>% 
+  ggplot(aes(x = Gender)) +
+  geom_bar(color = "black", fill = "#1261a0") +
+  labs(y = "Count", x="") +
+  ea_theme() +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+  theme(axis.ticks = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank()) +
+  labs(title = "Students by Gender",
+       x = "", y = "Count", fill = "")
+
+
+# Age
+age_plot <- age_data %>% 
+  ggplot(aes(x = Age)) +
+  geom_bar(color = "black", fill = "#58cced") +
+  labs(y = "Count", x="") +
+  ea_theme() +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+  theme(axis.ticks = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank()) +
+  labs(title = "Students by Age",
+       x = "", y = "Count", fill = "")
+
+
+# Degree level
+degree_level_plot <- degree_level_data %>% 
+  ggplot(aes(x = degree_level)) +
+  geom_bar(color = "black", fill = "#b2e2e2") +
+  labs(y = "Count", x="") +
+  ea_theme() +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+  theme(axis.ticks = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank()) +
+  labs(title = "Students by Degree Level",
+       x = "", y = "Count", fill = "")
+
+
+# Degree background
+degree_background_plot <- degree_background_data %>%
+  # Step 1: Reorder 'degree_background' as a factor in ascending alphabetical order
+  mutate(degree_background = factor(degree_background, levels = rev(c("Environmental science","Geology","Geography","Earth science","Biology / ecology","Data science","Social science / humanities","Computer science","Physics / astronomy","Business","Engineering","Chemistry","Math / statistics","Forestry","Soil science")))) %>%
+  
+  # Step 2: Create the plot
+  ggplot(aes(x = degree_background)) +
+  geom_bar(color = "black", fill = "#2ca25f") +
+  labs(y = "Count", x = "") +
+  coord_flip() +
+  ea_theme() +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.ticks = element_blank(),
+        legend.key.size = unit(1, 'lines'), legend.position = "top") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+  labs(title = "Students by Degree Background",
+       x = "", y = "Count", fill = "")
+
+
+
+# Gender
+
+# Save the gender plot as a .png file
+ggsave(filename = "gender_plot.png", plot = gender_plot, width = 8, height = 5, dpi = 300)
+# Save the age plot as a .png file
+ggsave(filename = "age_plot.png", plot = age_plot, width = 8, height = 5, dpi = 300)
+# Save the degree level plot as a .png file
+ggsave(filename = "degree_level_plot.png", plot = degree_level_plot, width = 8, height = 5, dpi = 300)
+# Save the degree background plot as a .png file
+ggsave(filename = "degree_background_plot.png", plot = degree_background_plot, width = 8, height = 5, dpi = 300)
+
+
+
+
+
+
+
+```
+
+```{r combine into single png}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+library(cowplot)  # Load cowplot for combining plots
+
+# Step 1: Create both plots (if not already created)
+# Assuming degree_background_plot and degree_level_plot are already created as before
+
+# Step 2: Combine the plots
+combined_plot <- plot_grid(gender_plot, age_plot, degree_level_plot, degree_background_plot, ncol = 2)
+
+# Step 3: Save the combined plot as a .png file
+ggsave(filename = "combined_demographic_plots.png", plot = combined_plot, width = 13, height = 8, dpi = 300)
+
+```
+
+```{r demograpic minimal_vgrid theme}
+
+
+# Get data
+gender_data <- read_csv("gender.csv")
+age_data <- read_csv("age.csv")
+degree_level_data <- read_csv("degree_level.csv")
+degree_background_data <- read_csv("degree_background.csv")
+
+
+
+
+# Gender
+gender_plot_minimal <- gender_data %>% 
+  ggplot(aes(x = Gender, y = ..prop.., group = 1)) +
+  geom_bar(color = "black", fill = "#1261a0") +
+  labs(y = "Proportion", x="") +
+  theme_minimal_hgrid() +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  theme(axis.ticks = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank()) +
+  labs(title = "A. Students by Gender",
+       x = "", y = "Proportion", fill = "")
+
+
+# Age
+age_plot_minimal <- age_data %>% 
+  ggplot(aes(x = Age, y = ..prop.., group = 1)) +
+  geom_bar(color = "black", fill = "#58cced") +
+  labs(y = "Proportion", x="") +
+  theme_minimal_hgrid() +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+  theme(axis.ticks = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank()) +
+  labs(title = "B. Students by Age",
+       x = "", y = "Proportion", fill = "")
+
+
+# Degree level
+
+degree_level_data$degree_level <- factor(degree_level_data$degree_level, 
+                      level = c("Undergraduate",
+                                "Graduate",
+                                "Professional"))
+
+
+degree_level_plot_minimal <- degree_level_data %>% 
+  ggplot(aes(x = degree_level, y = ..prop.., group = 1)) +
+  geom_bar(color = "black", fill = "#b2e2e2") +
+  labs(y = "Count", x="") +
+  theme_minimal_hgrid() +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+  theme(axis.ticks = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank()) +
+  labs(title = "C. Students by Degree Level",
+       x = "", y = "Proportion", fill = "")
+
+
+# Degree background
+degree_background_plot_minimal <- degree_background_data %>%
+  # Step 1: Reorder 'degree_background' as a factor in ascending alphabetical order
+  mutate(degree_background = factor(degree_background, levels = rev(c("Environmental science","Geology","Geography","Earth science","Biology / ecology","Data science","Social science / humanities","Engineering / mathematics","Computer science","Physics / astronomy","Business","Chemistry","Forestry / soil science")))) %>%
+  
+  # Step 2: Create the plot
+  ggplot(aes(x = degree_background, y = ..prop.., group = 1)) +
+  geom_bar(color = "black", fill = "#2ca25f") +
+  labs(y = "Count", x = "") +
+  coord_flip() +
+  theme_minimal_vgrid() +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.ticks = element_blank(),
+        legend.key.size = unit(1, 'lines'), legend.position = "top") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+  labs(title = "D. Students by Degree Background",
+       x = "", y = "Proportion", fill = "")
+
+
+# Save the gender plot as a .png file
+ggsave(filename = "gender_plot_minimal.png", plot = gender_plot_minimal, width = 8, height = 5, dpi = 300)
+# Save the age plot as a .png file
+ggsave(filename = "age_plot_minimal.png", plot = age_plot_minimal, width = 8, height = 5, dpi = 300)
+# Save the degree level plot as a .png file
+ggsave(filename = "degree_level_plot_minimal.png", plot = degree_level_plot_minimal, width = 8, height = 5, dpi = 300)
+# Save the degree background plot as a .png file
+ggsave(filename = "degree_background_plot_minimal.png", plot = degree_background_plot_minimal, width = 8, height = 5, dpi = 300)
+
+
+```
+
+```{r combine into single png 2}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+library(cowplot)  # Load cowplot for combining plots
+
+# Step 1: Create both plots (if not already created)
+# Assuming degree_background_plot and degree_level_plot are already created as before
+
+# Step 2: Combine the plots
+combined_plot <- plot_grid(gender_plot_minimal, age_plot_minimal, degree_level_plot_minimal, degree_background_plot_minimal, ncol = 2)
+combined_plot
+
+# Step 3: Save the combined plot as a .png file
+ggsave(filename = "combined_demographic_plots_minimal.png", plot = combined_plot, width = 13, height = 8, dpi = 300)
+
+```
+
+
+
+```{r boulder temps}
+# Load necessary libraries
+library(ggplot2)
+
+# Create the data frame
+temp_data <- data.frame(
+  Month = c("January", "February", "March", "April", "May", "June", 
+            "July", "August", "September", "October", "November", "December"),
+  Average_Temperature = c(-2.8, -2.2, 2.8, 7.2, 11.7, 18.3, 24.2, 23.3, 18.9, 10.6, 4.4, -2.2)
+)
+
+# Reorder the month factor to maintain chronological order
+temp_data$Month <- factor(temp_data$Month, levels = temp_data$Month)
+
+# Create the line plot using ggplot2
+temperature_plot <- ggplot(temp_data, aes(x = Month, y = Average_Temperature, group = 1)) +
+  geom_line(color = "#6a0dad", size = 1.2) +  # Create a line plot with purple line
+  geom_point(color = "#6a0dad", size = 3) +   # Add points at each month for emphasis
+  labs(title = "Average Monthly Temperatures in Boulder, CO (1960-1990)", 
+       x = "Month", y = "Average Temperature (°C)") +  # Add title and axis labels
+  theme_minimal() +  # Use a minimal theme
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Adjust x-axis text for readability
+
+# Display the plot
+print(temperature_plot)
+
+# Save the plot as a PNG file (optional)
+ggsave(filename = "boulder_avg_monthly_temps_line.png", plot = temperature_plot, width = 10, height = 6, dpi = 300)
+
+
+```
+
+```{r boulder temps excel theme}
+# Install ggthemes package if not already installed
+# install.packages("ggthemes")
+
+# Load necessary libraries
+library(ggplot2)
+library(ggthemes)
+
+# Create the data frame
+temp_data <- data.frame(
+  Month = c("January", "February", "March", "April", "May", "June", 
+            "July", "August", "September", "October", "November", "December"),
+  Average_Temperature = c(-2.8, -2.2, 2.8, 7.2, 11.7, 18.3, 24.2, 23.3, 18.9, 10.6, 4.4, -2.2)
+)
+
+# Reorder the month factor to maintain chronological order
+temp_data$Month <- factor(temp_data$Month, levels = temp_data$Month)
+
+# Create the line plot using ggplot2 with Excel theme
+temperature_plot <- ggplot(temp_data, aes(x = Month, y = Average_Temperature, group = 1)) +
+  geom_line(color = "#4575b4", size = 1.2) +  # Create a line plot with Excel-like blue color
+  geom_point(color = "#4575b4", size = 3) +   # Add points at each month
+  labs(title = "Average Monthly Temperatures in Boulder, CO (1960-1990)", 
+       x = "Month", y = "Average Temperature (°C)") +  # Add title and axis labels
+  theme_excel() +  # Apply Excel-like theme from ggthemes
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Adjust x-axis text for readability
+
+# Display the plot
+print(temperature_plot)
+
+# Save the plot as a PNG file (optional)
+ggsave(filename = "boulder_avg_monthly_temps_excel_style.png", plot = temperature_plot, width = 10, height = 6, dpi = 300)
+
+
+
+```
+
+```{r more boulder temps}
+# Load necessary libraries
+library(ggplot2)
+library(ggthemes)
+
+# Create the data frame with 1992-2021 average temperatures in Celsius (example data)
+temp_data <- data.frame(
+  Month = c("January", "February", "March", "April", "May", "June", 
+            "July", "August", "September", "October", "November", "December"),
+  Average_Temperature = c(1.6, 2.2, 6.7, 9.4, 14.4, 20.6, 23.9, 22.8, 19.0, 11.7, 6.1, 1.7)
+)
+
+# Reorder the month factor to maintain chronological order
+temp_data$Month <- factor(temp_data$Month, levels = temp_data$Month)
+
+# Create the line plot using ggplot2 with custom styling
+temperature_plot <- ggplot(temp_data, aes(x = Month, y = Average_Temperature, group = 1)) +
+  geom_line(color = "black", size = 1, linetype = "dashed") +  # Black dashed line
+  geom_point(color = "#66c2a5", size = 4) +  # Greenish color for points
+  labs(title = "Average Monthly Temperatures in Boulder, CO (1992-2021)", 
+       x = "Month", y = "Average Temperature (°C)") +  # Add title and axis labels
+  theme_minimal_hgrid() +  # Start with Excel-like theme
+  theme(
+    panel.background = element_rect(fill = "white"),  # Light gray background
+    axis.text.x = element_text(angle = 45, hjust = 1),  # Adjust x-axis text for readability
+    panel.grid = element_line(color = "gray80"),  # Lighter grid lines
+    plot.background = element_rect(fill = "white")   # Light gray overall plot background
+  )
+
+# Display the plot
+print(temperature_plot)
+
+# Save the plot as a PNG file (optional)
+ggsave(filename = "boulder_avg_monthly_temps_custom_style.png", plot = temperature_plot, width = 10, height = 6, dpi = 300)
+
+
+
+
+```
+
+```{r qualitative codes}
+# Load necessary libraries
+library(ggplot2)
+library(reshape2)
+
+# Create the data frame with the given data
+survey_data <- data.frame(
+  Code = c("CALC", "DIRECT", "EXCEL", "FUNCTION", "GOOGLE", "NA", "ORG", "PLOT", "PYTHON", "R", "TOOLS"),
+  Pre_Survey = c(55, 9, 42, 11, 2, 9, 57, 77, 11, 23, 40),
+  Post_Survey = c(36, 19, 11, 38, 0, 2, 66, 83, 32, 0, 68)
+)
+
+# Transform the data to a long format for easier plotting with ggplot2
+survey_long <- melt(survey_data, id.vars = "Code", variable.name = "Survey", value.name = "Percent")
+
+# Change the order of Survey levels to make Pre_Survey plot above Post_Survey
+survey_long$Survey <- factor(survey_long$Survey, levels = c("Post_Survey", "Pre_Survey"))
+
+# Reverse the order of the Code categories
+survey_long$Code <- factor(survey_long$Code, levels = rev(unique(survey_long$Code)))
+
+# Create a horizontal bar plot
+qual_percent_plot <- ggplot(survey_long, aes(x = Percent, y = Code, fill = Survey)) +
+  geom_bar(stat = "identity", position = "dodge", color="black") +
+  theme_minimal_vgrid() +
+  labs(#title = "Comparison of Pre- and Post-Survey Percentages by Code",
+       x = "Percentage",
+       y = "Code") +
+  scale_x_continuous(expand = expansion(mult = c(0, 0.05))) +
+  #scale_y_discrete(expand = expansion(mult = c(0.15, 0.15))) +
+  scale_fill_manual(values = c("Pre_Survey" = "#1f78b4", "Post_Survey" = "#33a02c"),
+                    breaks = c("Pre_Survey","Post_Survey"),
+                    labels = c("Pre Survey","Post Survey")) +
+  theme(legend.position = "bottom")
+
+qual_percent_plot
+
+# Save the plot as a PNG file (optional)
+ggsave(filename = "qual_percent_plot.png", plot = qual_percent_plot, width = 10, height = 8, dpi = 300)
+
+```
+
+```{r qual}
+
+# Load necessary libraries
+library(ggplot2)
+library(reshape2)
+
+# Create the data frame with the given data
+survey_data <- data.frame(
+  Code = c("CALC", "DIRECT", "EXCEL", "FUNCTION", "GOOGLE", "NA", "ORG", "PLOT", "PYTHON", "R", "TOOLS"),
+  Pre_Survey = c(55, 9, 42, 11, 2, 9, 57, 77, 11, 23, 40),
+  Post_Survey = c(36, 19, 11, 38, 0, 2, 66, 83, 32, 0, 68)
+)
+
+# Transform the data to a long format for easier plotting with ggplot2
+survey_long <- melt(survey_data, id.vars = "Code", variable.name = "Survey", value.name = "Percent")
+
+# Change the order of Survey levels to make Pre_Survey plot above Post_Survey
+survey_long$Survey <- factor(survey_long$Survey, levels = c("Post_Survey", "Pre_Survey"))
+
+# Reverse the order of the Code categories
+survey_long$Code <- factor(survey_long$Code, levels = rev(unique(survey_long$Code)))
+
+# Create a horizontal bar plot with black outlines and increased space between bars
+qual_plot2 <- ggplot(survey_long, aes(x = Percent, y = Code, fill = Survey)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.6, preserve = "single"), color = "black") +
+  theme_minimal_vgrid() +
+  labs(#title = "Comparison of Pre- and Post-Survey Percentages by Code",
+       x = "Percentage",
+       y = "Code") +
+  scale_fill_manual(values = c("Pre_Survey" = "#1f78b4", "Post_Survey" = "#33a02c"),
+                    breaks = c("Pre_Survey","Post_Survey"),
+                    labels = c("Pre Survey", "Post Survey")) +
+  theme(legend.position = "bottom",
+        axis.text.y = element_text(margin = margin(r = 0))) +  # Adds space between category labels and bars
+  scale_y_discrete(expand = expansion(add = c(0, 0))) +
+  #scale_y_continuous(expand = expansion(add = c(0, 0))) +
+  scale_x_continuous(expand = expansion(add = c(0, 0)))# Adds space between categories
+
+qual_plot2
+
+# Save the plot as a PNG file (optional)
+ggsave(filename = "qual_percent_plot2.png", plot = qual_plot2, width = 8, height = 5, dpi = 300)
+
+
+
+```
+
+```{r more qual plots}
+
+# Load necessary libraries
+library(ggplot2)
+library(reshape2)
+
+# Create the data frame with the given data
+survey_data <- data.frame(
+  Code = c("CALC", "DIRECTORY", "EXCEL", "FUNCTION", "ORG", "PLOT", "PYTHON", "R", "TOOLS"),
+  Pre_Survey = c(55, 9, 42, 11, 57, 77, 11, 23, 40), # Proportion pre
+  Post_Survey = c(36, 19, 11, 38, 66, 83, 32, 0, 68) # Proportion post
+)
+
+# Transform the data to a long format for easier plotting with ggplot2
+survey_long <- melt(survey_data, id.vars = "Code", variable.name = "Survey", value.name = "Percent")
+
+# Convert percentage values to proportions by dividing by 100
+survey_long$Proportion <- survey_long$Percent / 100
+
+# Change the order of Survey levels to make Pre_Survey plot above Post_Survey
+survey_long$Survey <- factor(survey_long$Survey, levels = c("Post_Survey", "Pre_Survey"))
+
+# Reverse the order of the Code categories
+survey_long$Code <- factor(survey_long$Code, levels = rev(unique(survey_long$Code)))
+
+# Create a horizontal bar plot with black outlines and increased space between bars
+qual_plot3 <- ggplot(survey_long, aes(x = Proportion, y = Code, fill = Survey)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.6, preserve = "single"), color = "black") +
+  theme_minimal_vgrid() +
+  labs(#title = "Comparison of Pre- and Post-Survey Percentages by Code",
+       x = "Proportion",
+       y = "Code") +
+  scale_fill_manual(values = c("Pre_Survey" = "#1f78b4", "Post_Survey" = "#33a02c"),
+                    breaks = c("Pre_Survey","Post_Survey"),
+                    labels = c("Pre-Bootcamp", "Post-Bootcamp")) +
+  theme(legend.position = "top",
+        legend.title = element_blank(),
+        legend.text = element_text(face = "bold"),
+        axis.ticks = element_blank(),
+        axis.text.y = element_text(margin = margin(r = 0))) +  # Adds space between category labels and bars
+  scale_y_discrete(expand = expansion(add = c(0, 0))) +
+  #scale_y_continuous(expand = expansion(add = c(0, 0))) +
+  scale_x_continuous(expand = expansion(add = c(0, 0)))# Adds space between categories
+
+qual_plot3
+
+# Save the plot as a PNG file (optional)
+ggsave(filename = "qual_percent_plot4.png", plot = qual_plot3, width = 8, height = 5, dpi = 300)
+
+
+```
