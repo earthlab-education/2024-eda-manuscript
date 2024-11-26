@@ -1,0 +1,248 @@
+---
+title: '2024-eda-manuscript-approach'
+output: html_document
+date: "2024-11-26"
+---
+
+
+
+```{r Figure 4, echo=FALSE, results=FALSE, fig.height = 5, fig.width = 10, message=FALSE}
+
+library(tidyverse)
+
+# Call in the data
+data <- read.csv("tool_year_trial_count.csv")
+
+# Turn Year variable (integer) into a factor
+data$Year <- as.factor(data$Year)
+
+
+# Reordering of factor levels
+data$Year <- factor(data$Year, 
+                      level = c("2023",
+                                "2022",
+                                "2021",
+                                "2020"))
+
+data$Trial <- factor(data$Trial, 
+                      level = c("Pre-Bootcamp",
+                                "Post-Bootcamp"))
+
+data$Tool <- factor(data$Tool, level = c(
+                      "Other (please list)",
+                      "Bash/Shell",
+                      "Scientific Programming (e.g. R, Python)",
+                      "Excel"))
+
+
+# Calculate proportion within each group (Year, Trial)
+data <- data %>%
+  group_by(Trial) %>%
+  mutate(Proportion = Count / sum(Count)) %>%
+  ungroup()
+
+
+
+# Make a plot
+plot0 <-  ggplot(data, aes(x = Tool, y = Proportion, fill = Year ) ) +
+  geom_bar(stat = "identity", position = "stack", width=0.95, color='black') +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 25), drop = TRUE, expand = expansion(mult = c(0.15, 0.15))) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0))) +
+  coord_flip() +
+  theme_classic() +
+  #theme_pubclean() +
+  theme_minimal_vgrid() +
+  #theme_minimal_vgrid() + 
+  #theme_bw() +
+  #geom_text(data = subset(data, Count != 0), fontface = 'bold', size = 4, position = position_stack(vjust = 0.5), color = 'black') +
+  theme(plot.margin=unit(c(0.25,0.3,0.1,0.25),"cm"),
+      axis.title.y = element_blank(),
+      legend.position = "top",
+      panel.spacing = unit(2, "lines"),
+      plot.caption = element_text(margin = margin(t = 0, r = 10, b = 0, l = 10), 
+                                      size = 6, color = "gray38", hjust = 1),
+      legend.title = element_blank(),
+      legend.text = element_text(size = 11),
+      plot.title = element_text(size=12, face="italic"),
+      #axis.title.x = element_blank(),
+      axis.text.x = element_text(size = 12, color = 'black'),
+      axis.text.y = element_text(size = 12, color = 'black'),
+      axis.ticks = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      strip.text.x = element_text(size=18, face="bold")) +
+scale_fill_manual(
+    values = c("2020" = "#b2e2e2", "2021" = "#66c2a4", "2022" = "#2ca25f", "2023" = "#0B6623"), 
+    breaks = c("2020","2021","2022","2023"),
+    labels = c("2020","2021","2022","2023")) +
+  labs(x = "\nProportion") +
+facet_wrap(~Trial) 
+
+plot0 
+
+ggsave("tools-faceted-minimal-proportion.png", plot0, height = 5, width = 10, units = "in", device = "png")
+```
+
+
+```{r Figure 5, echo=FALSE, results=FALSE, fig.height = 5, fig.width = 10, message=FALSE}
+
+# Call in the data
+data <- read.csv("comfort_year_count_trial.csv")
+
+# Turn Year variable (integer) into a factor
+data$Year <- as.factor(data$Year)
+
+
+# Reordering of factor levels
+data$Year <- factor(data$Year, 
+                      level = c("2023",
+                                "2022",
+                                "2021",
+                                "2020"))
+
+data$Trial <- factor(data$Trial, 
+                      level = c("Pre-Bootcamp",
+                                "Post-Bootcamp"))
+
+# Reordinging the response levels
+data$Comfort <- factor(data$Comfort, 
+                      level = c("I am very uncomfortable using this tool",
+                                "I am uncomfortable using this tool",
+                                "I am comfortable using this tool",
+                                "I am very comfortable using this tool"))
+
+
+# Calculate proportion within each group (Year, Trial)
+data <- data %>%
+  group_by(Trial) %>%
+  mutate(Proportion = Count / sum(Count)) %>%
+  ungroup()
+
+# Make a plot
+plot0 <-  ggplot(data, aes(x = Comfort, y = Proportion, fill = Year ) ) +
+  geom_bar(stat = "identity", position = "stack", width=0.95, color='black') +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 25), drop = TRUE, expand = expansion(mult = c(0.15, 0.15))) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0))) +
+  coord_flip() +
+  theme_minimal_vgrid() +
+  theme(plot.margin=unit(c(0.25,0.3,0.1,0.25),"cm"),
+      axis.title.y = element_blank(),
+      legend.position = "top",
+      panel.spacing = unit(2, "lines"),
+      plot.caption = element_text(margin = margin(t = 0, r = 10, b = 0, l = 10), 
+                                      size = 6, color = "gray38", hjust = 1),
+      legend.title = element_blank(),
+      legend.text = element_text(size = 11),
+      plot.title = element_text(size=12, face="italic"),
+      #axis.title.x = element_blank(),
+      axis.text.x = element_text(size = 12, color = 'black'),
+      axis.text.y = element_text(size = 12, color = 'black'),
+      axis.ticks = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      strip.text.x = element_text(size=18, face="bold")) +
+scale_fill_manual(
+    values = c("2020" = "#58cced", "2021" = "#3895d3", "2022" = "#1261a0", "2023" = "#0a477d"), 
+    breaks = c("2020","2021","2022","2023"),
+    labels = c("2020","2021","2022","2023")) +
+  labs(x = "\nProportion") +
+facet_wrap(~Trial) 
+
+plot0 
+
+ggsave("comfort-faceted-proportion.png", plot0, height = 5, width = 10, units = "in", device = "png")
+```
+
+
+### Chi Square Analysis
+
+```{r chi-square approach (see Table 2), fig.width=8, fig.height=3, echo=FALSE, results=FALSE, message=FALSE}
+
+# Create a matrix with the counts for pre and post workshop responses
+responses <- matrix(c(60, 47, 2, 5,  # Pre-workshop counts
+                      17, 67, 22, 6),  # Post-workshop counts
+                    nrow = 2, byrow = TRUE)
+
+# Label rows and columns
+rownames(responses) <- c("Pre_Workshop", "Post_Workshop")
+colnames(responses) <- c("Excel", "Scientific Programming (e.g. R, Python)", "Bash/Shell", "Other (please list)")
+
+# View the contingency table
+print(responses)
+
+# Perform the Chi-Square Test
+chi_square_result <- chisq.test(responses)
+
+# Print the results
+chi_square_result
+
+# Print the expected values
+cat("\nExpected Counts:\n")
+print(chi_square_result$expected)
+
+# Print the standardized residuals
+cat("\nStandardized Residuals:\n")
+print(chi_square_result$stdres)
+
+
+```
+```{r chi-square comfort (see Table 3), fig.width=8, fig.height=3, echo=FALSE, results=FALSE, message=FALSE}
+
+# Create a matrix with the counts for pre and post workshop responses
+responses <- matrix(c(5, 10, 54, 23,  # Pre-workshop counts
+                      0, 5, 47, 13),  # Post-workshop counts
+                    nrow = 2, byrow = TRUE)
+
+# Label rows and columns
+rownames(responses) <- c("Pre_Workshop", "Post_Workshop")
+colnames(responses) <- c("Very_Uncomfortable", "Uncomfortable", "Comfortable", "Very_Comfortable")
+
+# View the contingency table
+print(responses)
+
+# Perform the Chi-Square Test
+chi_square_result <- chisq.test(responses)
+
+# Print the results
+chi_square_result
+
+# Print the expected values
+cat("\nExpected Counts:\n")
+print(chi_square_result$expected)
+
+# Print the standardized residuals
+cat("\nStandardized Residuals:\n")
+print(chi_square_result$stdres)
+
+
+```
+
+```{r chi-square approach open ended (see Table 6), fig.width=8, fig.height=3, echo=FALSE, results=FALSE, message=FALSE}
+# Create a matrix with the counts for pre and post workshop responses
+responses <- matrix(c(30, 41, 12, 22, 29, 6, 21, 5, 6,  # Pre-workshop counts
+                      35, 44, 0, 6, 19, 20, 36, 10, 17),  # Post-workshop counts
+                    nrow = 2, byrow = TRUE)
+
+# Label rows and columns
+rownames(responses) <- c("Pre_Workshop", "Post_Workshop")
+colnames(responses) <- c("ORG","PLOT","R","EXCEL","CALC","FUNCTION","TOOLS","DIRECT","PYTHON")
+
+# View the contingency table
+print(responses)
+
+# Perform the Chi-Square Test
+chi_square_result <- chisq.test(responses)
+
+# Print the results
+chi_square_result
+
+# Print the expected values
+cat("\nExpected Counts:\n")
+print(chi_square_result$expected)
+
+# Print the standardized residuals
+cat("\nStandardized Residuals:\n")
+print(chi_square_result$stdres)
+
+
+
+
+```
